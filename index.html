@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>¿Cómo funciona una página web?</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --panel: #1e293b;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --accent: #38bdf8;
+    --accent2: #f472b6;
+    --accent3: #facc15;
+    --border: #334155;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+  header {
+    padding: 3rem 1.5rem 2rem;
+    text-align: center;
+  }
+  header h1 {
+    margin: 0 0 0.5rem;
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+  }
+  header p {
+    color: var(--muted);
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 1.5rem 4rem;
+  }
+  section {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.75rem;
+    margin-bottom: 1.75rem;
+  }
+  section h2 {
+    margin-top: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #0f172a;
+    flex-shrink: 0;
+  }
+  .b-html { background: var(--accent); }
+  .b-css { background: var(--accent2); }
+  .b-js { background: var(--accent3); }
+  .b-flow { background: #34d399; }
+
+  pre {
+    background: #0b1220;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    overflow-x: auto;
+    font-size: 0.9rem;
+  }
+  code { color: #7dd3fc; }
+  .muted { color: var(--muted); font-size: 0.95rem; }
+
+  /* Ejemplo interactivo HTML/CSS/JS */
+  .demo-box {
+    border: 2px dashed var(--border);
+    border-radius: 10px;
+    padding: 1.25rem;
+    text-align: center;
+    margin-top: 1rem;
+    transition: background 0.3s, transform 0.2s;
+  }
+  .demo-box button {
+    background: var(--accent);
+    color: #0f172a;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 1rem;
+  }
+  .demo-box button:hover { opacity: 0.85; }
+  .demo-box.clicked {
+    background: rgba(56, 189, 248, 0.1);
+    transform: scale(1.02);
+  }
+  #contador { font-weight: 700; color: var(--accent3); }
+
+  .flow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center;
+    margin-top: 1rem;
+  }
+  .flow div {
+    background: #0b1220;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    text-align: center;
+    flex: 1;
+    min-width: 140px;
+  }
+  .flow span { display: block; font-size: 1.4rem; margin-bottom: 0.25rem; }
+  .arrow { align-self: center; color: var(--muted); font-size: 1.3rem; }
+
+  footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.85rem;
+    padding-bottom: 2rem;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>¿Cómo funciona una página web?</h1>
+  <p>Una página web se construye con tres lenguajes que trabajan juntos: <strong>HTML</strong> (estructura), <strong>CSS</strong> (estilo) y <strong>JavaScript</strong> (comportamiento). Prueba los ejemplos en vivo de abajo.</p>
+</header>
+
+<main>
+
+  <section>
+    <h2><span class="badge b-flow">🌐</span> El camino de una página web</h2>
+    <p class="muted">Cuando escribes una dirección en el navegador, esto pasa detrás de escena:</p>
+    <div class="flow">
+      <div><span>⌨️</span>Escribes la URL</div>
+      <div class="arrow">→</div>
+      <div><span>📡</span>El navegador pide el archivo al servidor</div>
+      <div class="arrow">→</div>
+      <div><span>📄</span>El servidor envía HTML, CSS y JS</div>
+      <div class="arrow">→</div>
+      <div><span>🖥️</span>El navegador los interpreta y dibuja la página</div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="badge b-html">H</span> HTML: la estructura</h2>
+    <p>El HTML define <em>qué elementos</em> hay en la página: títulos, párrafos, botones, imágenes. Es el "esqueleto".</p>
+    <pre><code>&lt;h1&gt;Hola&lt;/h1&gt;
+&lt;p&gt;Este es un párrafo.&lt;/p&gt;
+&lt;button&gt;Haz clic&lt;/button&gt;</code></pre>
+    <p class="muted">Cada etiqueta (<code>&lt;h1&gt;</code>, <code>&lt;p&gt;</code>, <code>&lt;button&gt;</code>...) le dice al navegador qué tipo de contenido mostrar.</p>
+  </section>
+
+  <section>
+    <h2><span class="badge b-css">C</span> CSS: el estilo</h2>
+    <p>El CSS decide <em>cómo se ve</em> cada elemento: colores, tamaños, espaciado, posición.</p>
+    <pre><code>button {
+  background: #38bdf8;
+  border-radius: 8px;
+  padding: 10px 20px;
+}</code></pre>
+    <p>Mira el mismo botón con y sin estilo:</p>
+    <div style="display:flex; gap:1rem; flex-wrap:wrap; align-items:center; margin-top:0.75rem;">
+      <button style="all:revert;">Sin CSS</button>
+      <button style="background:var(--accent2); color:#0f172a; border:none; padding:0.6rem 1.2rem; border-radius:8px; font-weight:600; cursor:pointer;">Con CSS</button>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="badge b-js">JS</span> JavaScript: el comportamiento</h2>
+    <p>El JavaScript hace que la página <em>reaccione</em>: responde a clics, actualiza datos, valida formularios, sin recargar la página.</p>
+    <pre><code>let contador = 0;
+boton.addEventListener("click", () => {
+  contador++;
+  texto.textContent = contador;
+});</code></pre>
+    <p class="muted">Pruébalo tú mismo — cada clic ejecuta código JavaScript en este mismo instante:</p>
+    <div class="demo-box" id="demoBox">
+      <p>Has hecho clic <span id="contador">0</span> veces</p>
+      <button id="botonDemo">Haz clic aquí</button>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="badge b-flow">🧩</span> Los tres trabajando juntos</h2>
+    <p class="muted">Este mismo documento es un ejemplo real: es un único archivo <code>.html</code> que contiene HTML (el contenido que lees), CSS dentro de <code>&lt;style&gt;</code> (los colores y tarjetas que ves) y JavaScript dentro de <code>&lt;script&gt;</code> (el contador que acabas de usar).</p>
+  </section>
+
+</main>
+
+<footer>
+  Abre este archivo con el botón derecho → "Ver código fuente" (o Ctrl+U) para ver todo el HTML, CSS y JS.
+</footer>
+
+<script>
+  let contador = 0;
+  const boton = document.getElementById("botonDemo");
+  const texto = document.getElementById("contador");
+  const caja = document.getElementById("demoBox");
+
+  boton.addEventListener("click", () => {
+    contador++;
+    texto.textContent = contador;
+    caja.classList.add("clicked");
+    setTimeout(() => caja.classList.remove("clicked"), 200);
+  });
+</script>
+
+</body>
+</html>
