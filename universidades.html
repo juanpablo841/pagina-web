@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Buscador de Estudios Universitarios</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --panel: #1e293b;
+    --panel-hover: #253248;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --accent: #38bdf8;
+    --accent2: #f472b6;
+    --accent3: #facc15;
+    --accent4: #34d399;
+    --border: #334155;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+  }
+  header {
+    padding: 2.5rem 1.5rem 1.5rem;
+    text-align: center;
+  }
+  header h1 {
+    margin: 0 0 0.4rem;
+    font-size: clamp(1.6rem, 4vw, 2.2rem);
+  }
+  header p {
+    color: var(--muted);
+    max-width: 620px;
+    margin: 0 auto;
+  }
+  main {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 1.5rem 4rem;
+  }
+
+  /* Panel de filtros */
+  #filtros {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.5rem;
+    margin-bottom: 1.75rem;
+    position: sticky;
+    top: 1rem;
+    z-index: 5;
+  }
+  .filtros-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1.1rem;
+  }
+  .campo label {
+    display: block;
+    font-size: 0.82rem;
+    color: var(--muted);
+    margin-bottom: 0.4rem;
+    font-weight: 600;
+  }
+  .campo select,
+  .campo input {
+    width: 100%;
+    background: #0b1220;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.55rem 0.6rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  .campo select:focus,
+  .campo input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .precio-rango {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .precio-rango input { width: 100%; }
+  .precio-rango span { color: var(--muted); font-size: 0.85rem; }
+
+  #resumen {
+    margin-top: 1.1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  #contadorResultados {
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+  #contadorResultados strong { color: var(--accent); }
+  #btnLimpiar {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 0.45rem 0.9rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  #btnLimpiar:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Lista de resultados */
+  #resultados {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .tarjeta {
+    display: flex;
+    gap: 1.1rem;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.1rem;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.15s, border-color 0.15s;
+    text-align: left;
+  }
+  .tarjeta:hover {
+    background: var(--panel-hover);
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+  .tarjeta-imagen {
+    flex-shrink: 0;
+    width: 96px;
+    height: 96px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.4rem;
+  }
+  .tarjeta-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .tarjeta-info h3 {
+    margin: 0 0 0.2rem;
+    font-size: 1.05rem;
+  }
+  .tarjeta-universidad {
+    color: var(--accent);
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem;
+  }
+  .tarjeta-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 0.5rem;
+  }
+  .etiqueta {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    background: #0b1220;
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .etiqueta.tipo { color: #0f172a; background: var(--accent3); border: none; font-weight: 700; }
+  .tarjeta-desc {
+    color: var(--muted);
+    font-size: 0.88rem;
+    margin: 0;
+  }
+  .tarjeta-precio {
+    flex-shrink: 0;
+    text-align: right;
+    align-self: center;
+    min-width: 90px;
+  }
+  .tarjeta-precio .precio {
+    display: block;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--accent4);
+  }
+  .tarjeta-precio .duracion {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-top: 0.2rem;
+  }
+
+  #sinResultados {
+    text-align: center;
+    color: var(--muted);
+    padding: 3rem 1rem;
+    display: none;
+  }
+
+  /* Panel de detalle (modal) */
+  #overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(2, 6, 23, 0.75);
+    z-index: 20;
+    padding: 2rem 1rem;
+    overflow-y: auto;
+  }
+  #overlay.abierto { display: block; }
+  #detalle {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 1.75rem;
+    position: relative;
+  }
+  #cerrarDetalle {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: #0b1220;
+    border: 1px solid var(--border);
+    color: var(--text);
+    width: 2.1rem;
+    height: 2.1rem;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1rem;
+  }
+  #cerrarDetalle:hover { border-color: var(--accent2); color: var(--accent2); }
+  .detalle-imagen {
+    width: 100%;
+    height: 140px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3.5rem;
+    margin-bottom: 1.1rem;
+  }
+  #detalle h2 { margin: 0 0 0.2rem; }
+  #detalle .tarjeta-universidad { font-size: 0.95rem; }
+  .detalle-datos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.9rem;
+    margin: 1.1rem 0;
+    padding: 1rem;
+    background: #0b1220;
+    border-radius: 10px;
+  }
+  .dato label {
+    display: block;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--muted);
+    margin-bottom: 0.15rem;
+  }
+  .dato span { font-weight: 600; }
+  #detalle .descripcion-larga {
+    color: var(--text);
+    font-size: 0.95rem;
+  }
+  .enlace-oficial {
+    display: inline-block;
+    margin-top: 1.2rem;
+    color: var(--accent);
+    font-size: 0.9rem;
+    text-decoration: none;
+    border: 1px solid var(--border);
+    padding: 0.55rem 1rem;
+    border-radius: 8px;
+  }
+  .enlace-oficial:hover { border-color: var(--accent); background: rgba(56,189,248,0.08); }
+
+  footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.85rem;
+    padding-bottom: 2rem;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🎓 Buscador de Estudios Universitarios</h1>
+  <p>Encuentra grados, másteres, doctorados y ciclos de FP en universidades de toda España. Filtra por tipo de estudio, temática, ubicación y precio.</p>
+</header>
+
+<main>
+
+  <div id="filtros">
+    <div class="filtros-grid">
+      <div class="campo">
+        <label for="filtroTipo">Tipo de estudio</label>
+        <select id="filtroTipo">
+          <option value="">Todos</option>
+        </select>
+      </div>
+      <div class="campo">
+        <label for="filtroTematica">Temática</label>
+        <select id="filtroTematica">
+          <option value="">Todas</option>
+        </select>
+      </div>
+      <div class="campo">
+        <label for="filtroCiudad">Sitio / alrededores</label>
+        <select id="filtroCiudad">
+          <option value="">Todas</option>
+        </select>
+      </div>
+      <div class="campo">
+        <label>Precio (€/año)</label>
+        <div class="precio-rango">
+          <input type="number" id="precioMin" placeholder="Mín" min="0" step="50">
+          <span>—</span>
+          <input type="number" id="precioMax" placeholder="Máx" min="0" step="50">
+        </div>
+      </div>
+    </div>
+    <div id="resumen">
+      <div id="contadorResultados"><strong>0</strong> resultados</div>
+      <button id="btnLimpiar">Limpiar filtros</button>
+    </div>
+  </div>
+
+  <div id="resultados"></div>
+  <div id="sinResultados">No se han encontrado estudios con esos filtros. Prueba a ampliar el rango de precio o cambiar la temática.</div>
+
+</main>
+
+<footer>
+  Datos de ejemplo — actualmente solo se muestran titulaciones de la Universitat Politècnica de València (UPV).
+</footer>
+
+<div id="overlay">
+  <div id="detalle"></div>
+</div>
+
+<script>
+  // ---- Datos de ejemplo: Universitat Politècnica de València (UPV) ----
+  const estudios = [
+    {
+      id: 1,
+      universidad: "Universitat Politècnica de València (UPV)",
+      nombre: "Grado en Ingeniería Informática",
+      tipo: "Grado",
+      tematica: "Ingeniería y Tecnología",
+      ciudad: "Valencia",
+      precio: 1050,
+      duracion: "4 años",
+      creditos: "240 ECTS",
+      modalidad: "Presencial",
+      emoji: "💻",
+      color: "#0ea5e9",
+      descripcionCorta: "Formación completa en desarrollo de software, sistemas e inteligencia artificial.",
+      descripcionLarga: "El Grado en Ingeniería Informática de la UPV forma profesionales capaces de diseñar, desarrollar y mantener sistemas software y de información. Incluye especializaciones en computación, ingeniería de software, sistemas de información, tecnologías de la información y computación industrial. Cuenta con prácticas en empresas y un alto porcentaje de inserción laboral.",
+      enlace: "https://www.upv.es"
+    },
+    {
+      id: 2,
+      universidad: "Universitat Politècnica de València (UPV)",
+      nombre: "Grado en Ingeniería Industrial",
+      tipo: "Grado",
+      tematica: "Ingeniería y Tecnología",
+      ciudad: "Valencia",
+      precio: 1050,
+      duracion: "4 años",
+      creditos: "240 ECTS",
+      modalidad: "Presencial",
+      emoji: "⚙️",
+      color: "#f59e0b",
+      descripcionCorta: "Base generalista en mecánica, electricidad, electrónica y organización industrial.",
+      descripcionLarga: "El Grado en Ingeniería en Tecnologías Industriales ofrece una formación multidisciplinar en mecánica, electricidad, electrónica, automática y organización industrial, habilitando para el ejercicio de la ingeniería técnica industrial y sirviendo de base para másteres habilitantes de ingeniero industrial.",
+      enlace: "https://www.upv.es"
+    },
+    {
+      id: 3,
+      universidad: "Universitat Politècnica de València (UPV)",
+      nombre: "Grado en Arquitectura",
+      tipo: "Grado",
+      tematica: "Arquitectura y Construcción",
+      ciudad: "Valencia",
+      precio: 1150,
+      duracion: "5 años",
+      creditos: "300 ECTS",
+      modalidad: "Presencial",
+      emoji: "🏛️",
+      color: "#a78bfa",
+      descripcionCorta: "Diseño arquitectónico, urbanismo y construcción con talleres de proyectos.",
+      descripcionLarga: "Formación integral en diseño arquitectónico, urbanismo, estructuras, construcción e instalaciones. Combina talleres de proyectos con materias técnicas y humanísticas, preparando para la habilitación profesional como arquitecto/a.",
+      enlace: "https://www.upv.es"
+    },
+    {
+      id: 4,
+      universidad: "Universitat Politècnica de València (UPV)",
+      nombre: "Grado en Administración y Dirección de Empresas (ADE)",
+      tipo: "Grado",
+      tematica: "Empresa y Administración",
+      ciudad: "Valencia",
+      precio: 990,
+      duracion: "4 años",
+      creditos: "240 ECTS",
+      modalidad: "Presencial",
+      emoji: "📊",
+      color: "#34d399",
+      descripcionCorta: "Gestión empresarial, finanzas, marketing y organización de empresas.",
+      descripcionLarga: "Titulación orientada a la dirección y gestión de organizaciones, con contenidos en contabilidad, finanzas, marketing, recursos humanos y estrategia empresarial, además de un fuerte componente cuantitativo propio del entorno tecnológico de la UPV.",
+      enlace: "https://www.upv.es"
+    },
+    {
+      id: 5,
+      universidad: "Universitat Politècnica de València (UPV)",
+      nombre: "Grado en Bellas Artes",
+      tipo: "Grado",
+      tematica: "Diseño y Artes",
+      ciudad: "Valencia",
+      precio: 970,
+      duracion: "4 años",
+      creditos: "240 ECTS",
+      modalidad: "Presencial",
+      emoji: "🎨",
+      color: "#f472b6",
+      descripcionCorta: "Pintura, escultura, arte digital y producción audiovisual.",
+      descripcionLarga: "Formación artística integral que abarca pintura, escultura, dibujo, arte digital, fotografía y producción audiovisual, con talleres y laboratorios equipados para el desarrollo de proyectos creativos personales.",
+      enlace: "https://www.upv.es"
+    },
+    {
+      id: 6,
+      universidad: "Universitat Politècnica de València (UPV)",
+      nombre: "Máster en Inteligencia Artificial",
+      tipo: "Máster",
+      tematica: "Ingeniería y Tecnología",
+      ciudad: "Valencia",
+      precio: 1750,
+      duracion: "1 año",
+      creditos: "60 ECTS",
+      modalidad: "Presencial",
+      emoji: "🤖",
+      color: "#38bdf8",
+      descripcionCorta: "Aprendizaje automático, procesamiento de lenguaje natural y visión por computador.",
+      descripcionLarga: "Máster especializado en las técnicas más avanzadas de inteligencia artificial: aprendizaje automático, aprendizaje profundo, procesamiento del lenguaje natural, visión por computador y sistemas inteligentes, con proyecto final aplicado a casos reales.",
+      enlace: "https://www.upv.es"
+    },
+    {
+      id: 7,
+      universidad: "Universitat Politècnica de València (UPV)",
+      nombre: "Máster en Ingeniería del Software",
+      tipo: "Máster",
+      tematica: "Ingeniería y Tecnología",
+      ciudad: "Valencia",
+      precio: 1650,
+      duracion: "1 año",
+      creditos: "60 ECTS",
+      modalidad: "Presencial",
+      emoji: "🧩",
+      color: "#0ea5e9",
+      descripcionCorta: "Arquitectura de software, calidad, gestión de proyectos y DevOps.",
+      descripcionLarga: "Profundiza en arquitectura y diseño de software, calidad y testing, gestión ágil de proyectos, DevOps e ingeniería de requisitos, orientado a perfiles técnicos que quieren liderar equipos y proyectos de desarrollo.",
+      enlace: "https://www.upv.es"
+    },
+    {
+      id: 8,
+      universidad: "Universitat Politècnica de València (UPV)",
+      nombre: "Máster en Gestión de Empresas, Productos y Servicios",
+      tipo: "Máster",
+      tematica: "Empresa y Administración",
+      ciudad: "Valencia",
+      precio: 1500,
+      duracion: "1 año",
+      creditos: "60 ECTS",
+      modalidad: "Presencial",
+      emoji: "📈",
+      color: "#34d399",
+      descripcionCorta: "Dirección estratégica, innovación y gestión de proyectos empresariales.",
+      descripcionLarga: "Máster orientado a la dirección estratégica y operativa de empresas, con especial énfasis en la gestión de la innovación, el lanzamiento de nuevos productos y servicios, y la dirección de proyectos.",
+      enlace: "https://www.upv.es"
+    },
+    {
+      id: 9,
+      universidad: "Universitat Politècnica de València (UPV)",
+      nombre: "Doctorado en Tecnologías de la Información, Comunicaciones y Matemáticas",
+      tipo: "Doctorado",
+      tematica: "Ingeniería y Tecnología",
+      ciudad: "Valencia",
+      precio: 450,
+      duracion: "3-4 años",
+      creditos: "—",
+      modalidad: "Presencial / Mixta",
+      emoji: "🔬",
+      color: "#facc15",
+      descripcionCorta: "Investigación avanzada en informática, telecomunicaciones y matemática aplicada.",
+      descripcionLarga: "Programa de doctorado orientado a la formación de investigadores en las áreas de informática, telecomunicaciones y matemática aplicada, con líneas activas en inteligencia artificial, redes, procesamiento de señal y optimización.",
+      enlace: "https://www.upv.es"
+    },
+    {
+      id: 10,
+      universidad: "Universitat Politècnica de València (UPV)",
+      nombre: "CFGS en Desarrollo de Aplicaciones Multiplataforma (DAM)",
+      tipo: "FP",
+      tematica: "Ingeniería y Tecnología",
+      ciudad: "Valencia",
+      precio: 350,
+      duracion: "2 años",
+      creditos: "2000 horas",
+      modalidad: "Presencial",
+      emoji: "📱",
+      color: "#f97316",
+      descripcionCorta: "Ciclo formativo de grado superior para programar apps de escritorio, web y móvil.",
+      descripcionLarga: "Ciclo Formativo de Grado Superior que capacita para desarrollar, implantar y mantener aplicaciones informáticas multiplataforma, incluyendo aplicaciones de escritorio, web y para dispositivos móviles, con una fuerte componente práctica.",
+      enlace: "https://www.upv.es"
+    }
+  ];
+
+  // ---- Referencias DOM ----
+  const filtroTipo = document.getElementById("filtroTipo");
+  const filtroTematica = document.getElementById("filtroTematica");
+  const filtroCiudad = document.getElementById("filtroCiudad");
+  const precioMin = document.getElementById("precioMin");
+  const precioMax = document.getElementById("precioMax");
+  const contenedorResultados = document.getElementById("resultados");
+  const sinResultados = document.getElementById("sinResultados");
+  const contadorResultados = document.getElementById("contadorResultados");
+  const btnLimpiar = document.getElementById("btnLimpiar");
+  const overlay = document.getElementById("overlay");
+  const detalle = document.getElementById("detalle");
+  const cerrarBtn = document.getElementById("cerrarDetalle") || null;
+
+  function poblarSelect(select, valores) {
+    valores.forEach(valor => {
+      const opt = document.createElement("option");
+      opt.value = valor;
+      opt.textContent = valor;
+      select.appendChild(opt);
+    });
+  }
+
+  const tipos = [...new Set(estudios.map(e => e.tipo))].sort();
+  const tematicas = [...new Set(estudios.map(e => e.tematica))].sort();
+  const ciudades = [...new Set(estudios.map(e => e.ciudad))].sort();
+  poblarSelect(filtroTipo, tipos);
+  poblarSelect(filtroTematica, tematicas);
+  poblarSelect(filtroCiudad, ciudades);
+
+  function crearTarjeta(estudio) {
+    const tarjeta = document.createElement("button");
+    tarjeta.type = "button";
+    tarjeta.className = "tarjeta";
+    tarjeta.innerHTML = `
+      <div class="tarjeta-imagen" style="background:${estudio.color}22;">${estudio.emoji}</div>
+      <div class="tarjeta-info">
+        <p class="tarjeta-universidad">${estudio.universidad}</p>
+        <h3>${estudio.nombre}</h3>
+        <div class="tarjeta-meta">
+          <span class="etiqueta tipo">${estudio.tipo}</span>
+          <span class="etiqueta">${estudio.tematica}</span>
+          <span class="etiqueta">📍 ${estudio.ciudad}</span>
+        </div>
+        <p class="tarjeta-desc">${estudio.descripcionCorta}</p>
+      </div>
+      <div class="tarjeta-precio">
+        <span class="precio">${estudio.precio} €/año</span>
+        <span class="duracion">${estudio.duracion}</span>
+      </div>
+    `;
+    tarjeta.addEventListener("click", () => abrirDetalle(estudio));
+    return tarjeta;
+  }
+
+  function abrirDetalle(estudio) {
+    detalle.innerHTML = `
+      <button id="cerrarDetalle" aria-label="Cerrar">✕</button>
+      <div class="detalle-imagen" style="background:${estudio.color}22;">${estudio.emoji}</div>
+      <p class="tarjeta-universidad">${estudio.universidad}</p>
+      <h2>${estudio.nombre}</h2>
+      <div class="tarjeta-meta">
+        <span class="etiqueta tipo">${estudio.tipo}</span>
+        <span class="etiqueta">${estudio.tematica}</span>
+        <span class="etiqueta">📍 ${estudio.ciudad}</span>
+      </div>
+      <div class="detalle-datos">
+        <div class="dato"><label>Precio</label><span>${estudio.precio} €/año</span></div>
+        <div class="dato"><label>Duración</label><span>${estudio.duracion}</span></div>
+        <div class="dato"><label>Carga</label><span>${estudio.creditos}</span></div>
+        <div class="dato"><label>Modalidad</label><span>${estudio.modalidad}</span></div>
+      </div>
+      <p class="descripcion-larga">${estudio.descripcionLarga}</p>
+      <a class="enlace-oficial" href="${estudio.enlace}" target="_blank" rel="noopener noreferrer">Ver web oficial de la universidad ↗</a>
+    `;
+    overlay.classList.add("abierto");
+    document.getElementById("cerrarDetalle").addEventListener("click", cerrarDetalle);
+  }
+
+  function cerrarDetalle() {
+    overlay.classList.remove("abierto");
+  }
+
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) cerrarDetalle();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") cerrarDetalle();
+  });
+
+  function aplicarFiltros() {
+    const tipo = filtroTipo.value;
+    const tematica = filtroTematica.value;
+    const ciudad = filtroCiudad.value;
+    const min = precioMin.value ? Number(precioMin.value) : null;
+    const max = precioMax.value ? Number(precioMax.value) : null;
+
+    const filtrados = estudios.filter(e => {
+      if (tipo && e.tipo !== tipo) return false;
+      if (tematica && e.tematica !== tematica) return false;
+      if (ciudad && e.ciudad !== ciudad) return false;
+      if (min !== null && e.precio < min) return false;
+      if (max !== null && e.precio > max) return false;
+      return true;
+    });
+
+    contenedorResultados.innerHTML = "";
+    filtrados.forEach(e => contenedorResultados.appendChild(crearTarjeta(e)));
+
+    contadorResultados.innerHTML = `<strong>${filtrados.length}</strong> resultado${filtrados.length === 1 ? "" : "s"}`;
+    sinResultados.style.display = filtrados.length === 0 ? "block" : "none";
+  }
+
+  [filtroTipo, filtroTematica, filtroCiudad].forEach(el => el.addEventListener("change", aplicarFiltros));
+  [precioMin, precioMax].forEach(el => el.addEventListener("input", aplicarFiltros));
+
+  btnLimpiar.addEventListener("click", () => {
+    filtroTipo.value = "";
+    filtroTematica.value = "";
+    filtroCiudad.value = "";
+    precioMin.value = "";
+    precioMax.value = "";
+    aplicarFiltros();
+  });
+
+  aplicarFiltros();
+</script>
+
+</body>
+</html>
